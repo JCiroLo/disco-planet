@@ -5,8 +5,10 @@
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Musical Tower</title>
+  <title>Disco Planet</title>
 
+  <link rel="stylesheet" href="https://pro.fontawesome.com/releases/v5.10.0/css/all.css"
+    integrity="sha384-AYmEC3Yw5cVb3ZcuHtOA93w35dYTsvhLPVnYs9eStHfGJvOvKxVfELGroGkvsg+p" crossorigin="anonymous" />
   <link rel="stylesheet" href="./css/_defaul.css">
 
   <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
@@ -22,8 +24,76 @@
 </head>
 
 <body>
+  <div id="app"></div>
 
-  <script src="./js/main.js" type="module"></script>
+  <div id="controls">
+    <button id="play">
+      <i class="fas fa-play"></i>
+    </button>
+    <button id="pause">
+      <i class="fas fa-pause"></i>
+    </button>
+    <button id="stop">
+      <i class="fas fa-stop"></i>
+    </button>
+    <hr>
+    <button id="sample0">
+      <i class="fas fa-music"></i>
+      <span>1</span>
+    </button>
+    <button id="sample1">
+      <i class="fas fa-music"></i>
+      <span>2</span>
+    </button>
+    <button id="sample2">
+      <i class="fas fa-music"></i>
+      <span>3</span>
+    </button>
+    <button id="sample3">
+      <i class="fas fa-music"></i>
+      <span>4</span>
+    </button>
+  </div>
+
+  <script type="x-shader/x-vertex" id="vertexshader">
+
+    attribute float size;
+    attribute vec3 ca;
+
+    varying vec3 vColor;
+
+    void main() {
+
+      vColor = ca;
+
+      vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+
+      gl_PointSize = size * ( 300.0 / -mvPosition.z );
+
+      gl_Position = projectionMatrix * mvPosition;
+
+    }
+
+  </script>
+  <script type="x-shader/x-fragment" id="fragmentshader">
+
+    uniform vec3 color;
+    uniform sampler2D pointTexture;
+
+    varying vec3 vColor;
+
+    void main() {
+
+      vec4 color = vec4( color * vColor, 1.0 ) * texture2D( pointTexture, gl_PointCoord );
+
+      gl_FragColor = color;
+
+    }
+
+  </script>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.3.0/simplex-noise.min.js'></script>
+  <script type="module" src="./js/main.js"></script>
 </body>
 
 </html>
