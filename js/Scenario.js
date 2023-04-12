@@ -15,25 +15,11 @@ import { FilmPass } from 'three/addons/postprocessing/FilmPass.js'
 const noise = new SimplexNoise()
 
 const Utils = {
-  fractionate: (val, minVal, maxVal) => {
-    return (val - minVal) / (maxVal - minVal)
-  },
-  modulate: (val, minVal, maxVal, outMin, outMax) => {
-    var fr = Utils.fractionate(val, minVal, maxVal)
-    var delta = outMax - outMin
-    return outMin + fr * delta
-  },
-  avg: arr => {
-    var total = arr.reduce((sum, b) => {
-      return sum + b
-    })
-    return total / arr.length
-  },
-  max: arr => {
-    return arr.reduce((a, b) => {
-      return Math.max(a, b)
-    })
-  }
+  fractionate: (val, minVal, maxVal) => (val - minVal) / (maxVal - minVal),
+  modulate: (val, minVal, maxVal, outMin, outMax) =>
+    outMin + Utils.fractionate(val, minVal, maxVal) * (outMax - outMin),
+  avg: arr => arr.reduce((sum, b) => sum + b) / arr.length,
+  max: arr => arr.reduce((a, b) => Math.max(a, b))
 }
 
 export default class Scenario {
@@ -196,7 +182,7 @@ export default class Scenario {
   }
 
   _createCloud () {
-    const [n, dri, r, dro] = [2000, 50, 75, 50]
+    const [n, dri, r, dro] = [1500, 25, 75, 25]
     const pts = []
 
     for (let i = 0; i < n; i++) {
@@ -213,13 +199,27 @@ export default class Scenario {
         Math.cos(φ)
       )
       pts.push(ps.multiplyScalar(rand))
+
+      /* Math.cos(θ) * Math.sin(φ),
+        Math.sin(θ) * Math.sin(φ),
+        Math.cos(φ) ESTRELLAS */
+
+      /* Math.cos(θ) * Math.cos(φ),
+      Math.sin(θ) * Math.cos(φ),
+      Math.cos(φ) SUPERNOVA */
     }
 
     const cloudGeometry = new THREE.BufferGeometry().setFromPoints(pts)
 
-    const material = new THREE.PointsMaterial({
-      size: 1.5,
-      color: 'white'
+    const material = new THREE.ShaderMaterial({
+      transparent: true,
+      uniforms: {
+        size: { value: 10 },
+        scale: { value: 1 },
+        color: { value: new THREE.Color('white') }
+      },
+      vertexShader: THREE.ShaderLib.points.vertexShader,
+      fragmentShader: `uniform vec3 color; void main() { vec2 xy = gl_PointCoord.xy - vec2(0.75); float ll = length(xy); gl_FragColor = vec4(color, step(ll, 0.5)); }`
     })
 
     this.cloudPoints = new THREE.Points(cloudGeometry, material)
