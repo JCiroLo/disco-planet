@@ -234,27 +234,35 @@ export default class Scenario {
     this.musicPlayer = musicPlayer
     this.samples = this.musicPlayer.samples
 
-    const context = new AudioContext()
+    this.audioContext = new AudioContext()
 
-    const sample0 = context.createMediaElementSource(this.samples[0].element)
-    const sample1 = context.createMediaElementSource(this.samples[1].element)
-    const sample2 = context.createMediaElementSource(this.samples[2].element)
-    const sample3 = context.createMediaElementSource(this.samples[3].element)
+    const sample0 = this.audioContext.createMediaElementSource(
+      this.samples[0].element
+    )
+    const sample1 = this.audioContext.createMediaElementSource(
+      this.samples[1].element
+    )
+    const sample2 = this.audioContext.createMediaElementSource(
+      this.samples[2].element
+    )
+    const sample3 = this.audioContext.createMediaElementSource(
+      this.samples[3].element
+    )
 
-    this.audioAnalyser0 = context.createAnalyser()
-    this.audioAnalyser1 = context.createAnalyser()
-    this.audioAnalyser2 = context.createAnalyser()
-    this.audioAnalyser3 = context.createAnalyser()
+    this.audioAnalyser0 = this.audioContext.createAnalyser()
+    this.audioAnalyser1 = this.audioContext.createAnalyser()
+    this.audioAnalyser2 = this.audioContext.createAnalyser()
+    this.audioAnalyser3 = this.audioContext.createAnalyser()
 
     sample0.connect(this.audioAnalyser0)
     sample1.connect(this.audioAnalyser1)
     sample2.connect(this.audioAnalyser2)
     sample3.connect(this.audioAnalyser3)
 
-    this.audioAnalyser0.connect(context.destination)
-    this.audioAnalyser1.connect(context.destination)
-    this.audioAnalyser2.connect(context.destination)
-    this.audioAnalyser3.connect(context.destination)
+    this.audioAnalyser0.connect(this.audioContext.destination)
+    this.audioAnalyser1.connect(this.audioContext.destination)
+    this.audioAnalyser2.connect(this.audioContext.destination)
+    this.audioAnalyser3.connect(this.audioContext.destination)
 
     this.audioAnalyser0.fftSize = 512
     this.audioAnalyser1.fftSize = 512
@@ -364,6 +372,12 @@ export default class Scenario {
   }
 
   _onMusicControl (action) {
+    if (action === 'play') {
+      this.audioContext.resume()
+    } else {
+      this.audioContext.suspend()
+    }
+
     this.musicPlayer[action]()
   }
 
